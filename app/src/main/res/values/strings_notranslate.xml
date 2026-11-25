@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for Inbo from Clear SMS. See LICENSE and NOTICE. -->
+<!-- Strings that must NOT be translated: the product name and URLs. Every
+     entry here carries translatable="false", which keeps them out of the
+     translation status table and out of Lint's MissingTranslation check,
+     and tells translators to leave them alone. A convention test
+     (NoTranslateStringsConventionTest) fails the build if a string here
+     lacks the flag, or if a url_* string lands in any other file. -->
+<resources>
+    <!-- "Inbo" is the product name; it is the same in every language. -->
+    <string name="app_name" translatable="false">Inbo</string>
+    <string name="app_wordmark" translatable="false">inbo.</string>
+
+    <!-- Links opened from Settings → About / Support. -->
+    <string name="url_source_code" translatable="false">https://github.com/harishkotra/inbo</string>
+    <string name="url_release_notes" translatable="false">https://github.com/harishkotra/inbo/releases/tag/v%1$s</string>
+    <string name="url_donate_paypal" translatable="false">https://paypal.me/prakashait</string>
+</resources>

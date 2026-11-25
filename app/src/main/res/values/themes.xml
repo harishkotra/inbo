@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for Inbo from Clear SMS. See LICENSE and NOTICE. -->
+<resources>
+    <style name="Theme.ClearSms" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/inbo_launch_background</item>
+    </style>
+</resources>

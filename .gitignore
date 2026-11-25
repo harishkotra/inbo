@@ -1,0 +1,74 @@
+# Modified for Inbo from Clear SMS. See LICENSE and NOTICE.
+
+# Build output, downloaded dependencies, and generated tooling state
+.gradle/
+.kotlin/
+build/
+out/
+.externalNativeBuild/
+.cxx/
+.ksp/
+app/release/
+*.apk
+*.aab
+*.apks
+*.idsig
+output-metadata.json
+!gradle/wrapper/gradle-wrapper.jar
+
+# Machine-specific paths, dotenv files, and private signing material
+local.properties
+.env
+.env.*
+!.env.example
+!.env.sample
+keystore.properties
+signing.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+
+# Editors, profiling, and device recordings
+.idea/
+*.iml
+.vscode/
+captures/
+*.hprof
+*.trace
+*.log
+*.swp
+
+# OS metadata
+.DS_Store
+.AppleDouble
+._*
+Thumbs.db
+Desktop.ini
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Device data and generated SQLite sidecars
+*.jsonl
+!/scripts/demo/messages.jsonl
+adb_findings.txt
+device_corpus.json
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+/local-data/
+/device-dumps/
+
+# Local Git history export
+/inbo.bundle
