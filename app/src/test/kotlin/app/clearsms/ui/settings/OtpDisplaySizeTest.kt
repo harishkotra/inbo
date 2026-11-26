@@ -1,3 +1,5 @@
+// Modified for Inbo from Clear SMS. See LICENSE and NOTICE.
+
 package app.clearsms.ui.settings
 
 import app.clearsms.domain.model.OtpDisplaySize
@@ -53,10 +55,9 @@ class OtpDisplaySizeTest {
     }
 
     @Test
-    fun `notification code size increases strictly and the default is the native title size`() {
+    fun `notification code size increases strictly and the default prioritizes the digits`() {
         val sizes = OtpDisplaySize.entries.map(OtpNotifier::notificationFontSp)
         assertThat(sizes).isInStrictOrder()
-        // 16sp is the platform notification title size: an untouched install renders as before.
-        assertThat(OtpNotifier.notificationFontSp(OtpDisplaySize.DEFAULT)).isEqualTo(16)
+        assertThat(OtpNotifier.notificationFontSp(OtpDisplaySize.DEFAULT)).isEqualTo(24)
     }
 }

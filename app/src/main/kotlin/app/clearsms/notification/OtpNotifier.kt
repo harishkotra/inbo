@@ -1,9 +1,16 @@
+// Modified for Inbo from Clear SMS. See LICENSE and NOTICE.
+
 package app.clearsms.notification
 
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
+import android.text.style.TtsSpan
 import android.util.TypedValue
 import android.widget.RemoteViews
 import androidx.annotation.LayoutRes
@@ -22,28 +29,11 @@ import javax.inject.Singleton
 /**
  * Heads-up notification for a received OTP.
  *
- * The code is rendered as spaced digits, sized according to the user's OTP
- * display-size setting, with the full message shown on expand. Copy is ALWAYS
- * available; the remaining actions honor the user's notification-action
- * selection (see [NotificationActionPlanner.forOtp]).
- *
- * WHY A CUSTOM CONTENT VIEW: the setting used to be a `RelativeSizeSpan` on
- * the template title, which has no effect - since API 24
- * `Notification.safeCharSequence()` strips every RelativeSizeSpan and
- * AbsoluteSizeSpan from the title, text and bigText at set time (measured on
- * API 36: Option 1 and Option 5 both rendered 32 px digits, and a sized
- * bigText rendered at plain body size). The only template-friendly way to
- * size one line is [NotificationCompat.DecoratedCustomViewStyle] with a
- * small [RemoteViews] whose code TextView gets [RemoteViews.setTextViewTextSize]:
- * the system still draws the header, large icon, chevron, theming and action
- * buttons, so this stays Material You / OEM-skin friendly (the same pattern
- * [TransactionNotifier] uses for its colored amount). On API 23 androidx
- * renders the decoration from its own compat template and the size call is
- * API 16+, so the same code path applies there.
- *
- * The spaced code is ALSO kept as the plain title (and the sender as the
- * text) so TalkBack's notification announcement, wearables and anything else
- * that ignores custom views still get the digits one by one.
+ * Custom views size the code independently of the sender line. Android
+ * strips font-size spans from the fallback title, so that title uses bold
+ * digits and a speech span for surfaces that render their own template.
+ * Copy is always available in the system actions. Other actions honor
+ * [NotificationActionPlanner.forOtp].
  *
  * LOCKSCREEN: the OTP digits are the title, so the notification is
  * [NotificationCompat.VISIBILITY_PRIVATE] with a digit-free public version
@@ -118,6 +108,7 @@ class OtpNotifier
                     .setContentText(context.getString(R.string.otp_from, senderName))
                     .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                     .setCustomContentView(codeView(R.layout.notification_otp, title, senderName, displaySize))
+                    .setCustomHeadsUpContentView(codeView(R.layout.notification_otp, title, senderName, displaySize))
                     .setCustomBigContentView(
                         codeView(R.layout.notification_otp_big, title, senderName, displaySize)
                             .apply { setTextViewText(R.id.otp_body, message.body) },
@@ -135,7 +126,7 @@ class OtpNotifier
                 when (action) {
                     NotificationAction.COPY_OTP -> {
                         builder.addAction(
-                            0,
+                            R.drawable.ic_notification_copy,
                             context.getString(R.string.action_copy),
                             otpAction(OtpActionReceiver.ACTION_COPY, message, otp),
                         )
@@ -245,27 +236,19 @@ class OtpNotifier
         }
 
         companion object {
-            /**
-             * "123456" → "1 2 3 4 5 6". Spacing the digits is what makes
-             * TalkBack read them one at a time instead of as "one hundred
-             * twenty-three thousand..."; the clipboard gets the unspaced
-             * [otp] via [OtpActionReceiver], never this string.
-             */
-            fun buildTitle(otp: String): CharSequence = otp.toCharArray().joinToString(" ")
+            internal fun buildTitle(otp: String): CharSequence =
+                SpannableString(otp).apply {
+                    setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    setSpan(TtsSpan.DigitsBuilder(otp).build(), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
 
-            /**
-             * Code-line text size per option, in sp - strictly increasing,
-             * with the default (Option 2) at the platform's own notification
-             * title size (16sp) so an untouched install looks exactly as
-             * before. The largest keeps an 8-digit spaced code on one line
-             * in the shade's content column.
-             */
+            /** Code size in sp inside the custom notification views. */
             internal fun notificationFontSp(displaySize: OtpDisplaySize): Int =
                 when (displaySize) {
-                    OtpDisplaySize.OPTION_1 -> 14
-                    OtpDisplaySize.OPTION_2 -> 16
-                    OtpDisplaySize.OPTION_3 -> 20
-                    OtpDisplaySize.OPTION_4 -> 24
+                    OtpDisplaySize.OPTION_1 -> 16
+                    OtpDisplaySize.OPTION_2 -> 24
+                    OtpDisplaySize.OPTION_3 -> 26
+                    OtpDisplaySize.OPTION_4 -> 28
                     OtpDisplaySize.OPTION_5 -> 30
                 }
         }

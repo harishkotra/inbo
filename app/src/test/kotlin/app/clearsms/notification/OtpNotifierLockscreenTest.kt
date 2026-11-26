@@ -1,7 +1,11 @@
+// Modified for Inbo from Clear SMS. See LICENSE and NOTICE.
+
 package app.clearsms.notification
 
 import android.app.Notification
 import android.content.Context
+import android.text.Spanned
+import android.text.style.TtsSpan
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
@@ -121,17 +125,19 @@ class OtpNotifierLockscreenTest {
         val sizesPx = OtpDisplaySize.entries.map { codeView(build(it)).textSize }
         assertThat(sizesPx).isInStrictOrder()
         assertThat(build().bigContentView).isNotNull()
+        assertThat(build().headsUpContentView).isNotNull()
     }
 
     @Test
-    fun `code is spaced digit by digit in both the custom view and the title`() {
-        // Spaced digits are what TalkBack reads one at a time; the title stays
-        // set for services and surfaces that ignore custom views.
+    fun `compact code preserves leading zeros and digit by digit speech`() {
         val notification = build(OtpDisplaySize.OPTION_5)
-        assertThat(codeView(notification).text.toString()).isEqualTo("1 2 3 4 5 6")
-        assertThat(notification.extras.getCharSequence(NotificationCompat.EXTRA_TITLE).toString())
-            .isEqualTo("1 2 3 4 5 6")
-        // The clipboard payload is the unspaced code, carried by the Copy action's intent.
-        assertThat(OtpNotifier.buildTitle("123456").toString().replace(" ", "")).isEqualTo("123456")
+        assertThat(codeView(notification).text.toString()).isEqualTo("123456")
+        assertThat(notification.extras.getCharSequence(NotificationCompat.EXTRA_TITLE).toString()).isEqualTo("123456")
+
+        val title = OtpNotifier.buildTitle("03827164") as Spanned
+        assertThat(title.toString()).isEqualTo("03827164")
+        val speech = title.getSpans(0, title.length, TtsSpan::class.java).single()
+        assertThat(speech.type).isEqualTo(TtsSpan.TYPE_DIGITS)
+        assertThat(speech.args.getString(TtsSpan.ARG_DIGITS)).isEqualTo("03827164")
     }
 }
